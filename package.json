@@ -1,12 +1,12 @@
 {
-  "name":         "coffee-script",
-  "description":  "Unfancy JavaScript",
-  "keywords":     ["javascript", "language", "coffeescript", "compiler"],
-  "author":       "Jeremy Ashkenas",
+  "name":         "caffeine",
+  "description":  "Unfancy JavaScript powered by CoffeeScript Caffeine",
+  "keywords":     ["javascript", "language", "coffeescript", "caffeine", "compiler"],
+  "author":       "Roman I. Kuzmin",
   "version":      "1.2.1-pre",
   "licenses":     [{
     "type":       "MIT",
-    "url":        "http://github.com/jashkenas/coffee-script/raw/master/LICENSE"
+    "url":        "http://github.com/ich/caffeine/raw/master/LICENSE"
   }],
   "engines":      {
     "node":       ">=0.4.0"
@@ -16,13 +16,13 @@
   },
   "main" : "./lib/coffee-script/coffee-script",
   "bin":          {
-    "coffee":     "./bin/coffee",
-    "cake":       "./bin/cake"
+    "caffeine":   "./bin/coffee",
+    "bake":       "./bin/cake"
   },
-  "homepage":     "http://coffeescript.org",
+  "homepage":     "https://github.com/ich/caffeine",
   "repository":   {
     "type": "git",
-    "url": "git://github.com/jashkenas/coffee-script.git"
+    "url": "git://github.com/ich/caffeine.git"
   },
   "devDependencies": {
     "uglify-js":  ">=1.0.0",
