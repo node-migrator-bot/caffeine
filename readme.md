@@ -38,6 +38,6 @@
 
   https://github.com/ich/caffeine/issues/
 
-### Based on:
+### Based on
 
   [<img src='https://github.com/ich/caffeine/raw/master/documentation/images/logo.png' />](http://github.com/jashkenas/coffee-script)
