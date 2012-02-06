@@ -32,7 +32,7 @@
 
 ### For documentation, usage, and examples, see:
   [Caffeine (not ready yet)](https://github.com/ich/caffeine)
-  [CoffeeScript](http://github.com/jashkenas/coffee-script)
+  [CoffeeScript](http://coffeescript.org)
 
 ### To suggest a feature, report a bug, or general discussion:
 
@@ -40,4 +40,4 @@
 
 ### Based on
 
-  [<img src='https://github.com/ich/caffeine/raw/master/documentation/images/logo.png' />](http://github.com/jashkenas/coffee-script)
+  [<img src='https://github.com/ich/caffeine/raw/master/documentation/images/logo.png' />](http://coffeescript.org)
