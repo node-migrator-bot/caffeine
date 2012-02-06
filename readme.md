@@ -4,15 +4,15 @@
 
   Caffeine is a language that extends CoffeeScript.
 
-### Install [Node.js](https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager)
-  for Ubuntu (latest stable version):
+### Install [Node.js](http://nodejs.org/)
+  [for Ubuntu](https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager) (latest stable version):
   
     sudo apt-get install python-software-properties
     sudo add-apt-repository ppa:chris-lea/node.js
     sudo apt-get update
     sudo apt-get install nodejs
 
-### Install NMP
+### Install [NMP](http://npmjs.org/)
   for Ubuntu (latest stable version from ppa:chris-lea/node.js repository):
 
     sudo apt-get install npm
