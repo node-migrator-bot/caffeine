@@ -1,4 +1,4 @@
-# Caffeine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src='https://github.com/ich/caffeine/raw/master/caffeine.png' />
+# [![CoffeeScript](https://github.com/ich/caffeine/raw/master/documentation/images/logo.png?r=1)](http://coffeescript.org)
 
   [![Build Status](https://secure.travis-ci.org/ich/caffeine.png)](http://travis-ci.org/ich/caffeine)
 
@@ -40,4 +40,4 @@
 
 ### Based on
 
-  [<img src='https://github.com/ich/caffeine/raw/master/documentation/images/logo.png' />](http://coffeescript.org)
+  [![CoffeeScript](https://github.com/jashkenas/coffee-script/raw/master/documentation/images/logo.png?r=1)](http://coffeescript.org)
