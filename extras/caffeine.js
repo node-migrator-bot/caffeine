@@ -3665,7 +3665,7 @@ if (typeof module !== 'undefined' && require.main === module) {
       this.name = name;
       this.value = value;
       this.splat = splat;
-      if (name = (_ref3 = this.name.unwrapAll().value, __indexOf.call(STRICT_PROSCRIBED, _ref3) >= 0)) {
+      if (_ref3 = (name = this.name.unwrapAll().value), __indexOf.call(STRICT_PROSCRIBED, _ref3) >= 0) {
         throw SyntaxError("parameter name \"" + name + "\" is not allowed");
       }
     }
