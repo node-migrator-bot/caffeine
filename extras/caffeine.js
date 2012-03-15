@@ -1,5 +1,5 @@
 /**
- * CoffeeScript Compiler v0.1.5
+ * CoffeeScript Compiler v0.1.6
  * http://coffeescript.org
  *
  * Copyright 2011, Jeremy Ashkenas
@@ -4808,7 +4808,6 @@ if (typeof module !== 'undefined' && require.main === module) {
       var call, code, lexer, literalKey, rel, relative;
       rel = Import.rootFile === "repl" ? "." : Import.rootFile;
       relative = (Path.relative(FileSystem.realpathSync(rel), file)).replace(/^(\.\.\/|\.\.\\\\)/, "");
-      console.log(relative);
       if (relative === "") {
         literalKey = new Literal("\"" + (Path.basename(file)) + "\"");
       } else {
@@ -5012,7 +5011,7 @@ if (typeof module !== 'undefined' && require.main === module) {
     });
   }
 
-  exports.VERSION = '0.1.5';
+  exports.VERSION = '0.1.6';
 
   exports.RESERVED = RESERVED;
 

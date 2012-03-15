@@ -2124,7 +2124,6 @@ exports.Import = class Import extends Base
   checkImports: (o, variable, file) ->
     rel = if Import.rootFile is "repl" then "." else Import.rootFile
     relative = (Path.relative FileSystem.realpathSync(rel), file).replace /^(\.\.\/|\.\.\\\\)/, ""
-    console.log relative
 
     if relative is ""
       literalKey = new Literal "\"#{ Path.basename file }\""
