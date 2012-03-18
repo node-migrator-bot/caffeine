@@ -4783,8 +4783,8 @@ if (typeof module !== 'undefined' && require.main === module) {
         Import.imported = {};
         Import.properties = [];
         Import.rootFile = null;
-        Import.importedDeclarations = {};
         Import.delayedEnabled = false;
+        Import.importedDeclarations = {};
         throw ex;
       }
     };
@@ -4797,7 +4797,7 @@ if (typeof module !== 'undefined' && require.main === module) {
         return "";
       }
       filename = this.filename(o);
-      args = [this.checkImports(o, variable, filename)];
+      args = [new Literal("'" + (this.checkImports(o, variable, filename)) + "'")];
       if (!(Import.imported[filename] || o.importingFile === filename)) {
         args.push(new Literal("function(cl) { " + variable + " = cl; }"));
         Import.delayedEnabled = true;
@@ -4809,14 +4809,10 @@ if (typeof module !== 'undefined' && require.main === module) {
     };
 
     Import.prototype.checkImports = function(o, variable, file) {
-      var call, code, lexer, literalKey, rel, relative;
+      var call, code, importKey, lexer, rel, relative;
       rel = Import.rootFile === "repl" ? "." : Import.rootFile;
       relative = (Path.relative(FileSystem.realpathSync(rel), file)).replace(/^(\.\.\/|\.\.\\\\)/, "");
-      if (relative === "") {
-        literalKey = new Literal("\"" + (Path.basename(file)) + "\"");
-      } else {
-        literalKey = new Literal("\"" + relative + "\"");
-      }
+      importKey = relative || Path.basename(file);
       if (!(file in Import.imported)) {
         Import.imported[file] = false;
         o = extend({}, o);
@@ -4832,13 +4828,13 @@ if (typeof module !== 'undefined' && require.main === module) {
         code = new Value(code, [new Access(new Literal("call"))]);
         call = new Call(code, [new Literal("this")]);
         o.importingFile = file;
-        Import.properties.push([literalKey, new Literal(call.compile(o))]);
+        Import.properties.push([importKey, call.compile(o)]);
         Import.imported[file] = true;
-        if (relative === "") {
-          Import.importedDeclarations[variable] = new Call(new Literal("__imports.get"), [literalKey]);
+        if (!relative) {
+          Import.importedDeclarations[variable] = new Call(new Literal("__imports.get"), [new Literal("'" + importKey + "'")]);
         }
       }
-      return literalKey;
+      return importKey;
     };
 
     Import.flush = function(o) {
@@ -4849,19 +4845,18 @@ if (typeof module !== 'undefined' && require.main === module) {
         Import.imported = {};
         Import.properties = [];
         Import.rootFile = null;
-        Import.importedDeclarations = {};
         Import.delayedEnabled = false;
+        Import.importedDeclarations = {};
       }
     };
 
     Import.assignImports = function(o) {
-      var call, code, properties, property, thisLit, value, values, _i, _len, _ref3;
+      var accesses, call, code, codeBlock, importKey, properties, property, thisLit, _i, _len, _ref3, _ref4;
       o = extend({}, o);
       o.indent += TAB;
       properties = {};
       properties.list = "{}";
       if (Import.delayedEnabled) properties.delayed = "[]";
-      properties.put = "function(path, code) { " + "this.list[path] = code; " + "}";
       properties.get = (function() {
         switch (Import.delayedEnabled) {
           case true:
@@ -4873,13 +4868,15 @@ if (typeof module !== 'undefined' && require.main === module) {
       thisLit = new Literal("this");
       code = new Code([]);
       for (property in properties) {
-        value = properties[property];
-        code.body.push(new Assign(new Value(thisLit, [new Access(new Literal(property))]), new Literal(value)));
+        codeBlock = properties[property];
+        accesses = [new Access(new Literal(property))];
+        code.body.push(new Assign(new Value(thisLit, accesses), new Literal(codeBlock)));
       }
       _ref3 = Import.properties;
       for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-        values = _ref3[_i];
-        code.body.push(new Call(new Value(thisLit, [new Access(new Literal("put"))]), values));
+        _ref4 = _ref3[_i], importKey = _ref4[0], codeBlock = _ref4[1];
+        accesses = [new Access(new Literal("list")), new Access(new Literal("'" + importKey + "'"))];
+        code.body.push(new Assign(new Value(thisLit, accesses), new Literal(codeBlock)));
       }
       if (Import.delayedEnabled) {
         code.body.push(new Literal("(function(a, b, c) { " + "while (c = a.shift()) { " + "c[1](b[c[0]]); " + "} " + "})(this.delayed, this.list)"));
