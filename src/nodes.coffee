@@ -2057,6 +2057,7 @@ exports.Import = class Import extends Base
   @properties: []
   @rootFile: null
   @importedDeclarations: {}
+  @delayedEnabled: no
 
   constructor: (@searchPath, types={}) ->
     {@isAbsolute, @isRelative, @isResolve} = types
@@ -2097,6 +2098,7 @@ exports.Import = class Import extends Base
       Import.properties = []
       Import.rootFile = null
       Import.importedDeclarations = {}
+      Import.delayedEnabled = no
       throw ex
 
   compileNode: (o) ->
@@ -2112,6 +2114,7 @@ exports.Import = class Import extends Base
 
     unless Import.imported[filename] or o.importingFile is filename
       args.push new Literal "function(cl) { #{variable} = cl; }"
+      Import.delayedEnabled = yes
 
     word = if Import.rootFile isnt o.filename then "this" else "__imports"
 
@@ -2169,21 +2172,25 @@ exports.Import = class Import extends Base
       Import.properties = []
       Import.rootFile = null
       Import.importedDeclarations = {}
+      Import.delayedEnabled = no
 
   @assignImports: (o)  ->
     o = extend {}, o
     o.indent += TAB
 
-    properties = 
-      list    : new Literal "{}"
-      delayed : new Literal "[]"
-
-      put : new Literal "function(path, code) { " +
+    properties = {}
+    properties.list    = new Literal "{}"
+    properties.delayed = new Literal "[]" if Import.delayedEnabled
+    properties.put = new Literal "function(path, code) { " +
         "this.list[path] = code; " +
       "}"
-      get : new Literal "function(path, delayed) { " +
+    properties.get = switch Import.delayedEnabled
+      when yes then new Literal "function(path, delayed) { " +
         "if (delayed) " +
           "this.delayed.push([path, delayed]); " +
+        "return this.list[path]; " +
+      "}"
+      else new Literal "function(path) { " +
         "return this.list[path]; " +
       "}"
 
@@ -2197,11 +2204,12 @@ exports.Import = class Import extends Base
     for values in Import.properties
       code.body.push new Call   new Value(thisLit, [ new Access new Literal "put" ]), values
 
-    code.body.push new Literal "(function(a, b, c) { " +
-      "while (c = a.shift()) { " +
-        "c[1](b[c[0]]); " +
-      "} " +
-    "})(this.delayed, this.list)"
+    if Import.delayedEnabled
+      code.body.push new Literal "(function(a, b, c) { " +
+        "while (c = a.shift()) { " +
+          "c[1](b[c[0]]); " +
+        "} " +
+      "})(this.delayed, this.list)"
 
     code.body.push new Literal "this"
     code.body.makeReturn()

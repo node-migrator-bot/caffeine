@@ -4729,6 +4729,8 @@ if (typeof module !== 'undefined' && require.main === module) {
 
     Import.importedDeclarations = {};
 
+    Import.delayedEnabled = false;
+
     function Import(searchPath, types) {
       this.searchPath = searchPath;
       if (types == null) types = {};
@@ -4782,6 +4784,7 @@ if (typeof module !== 'undefined' && require.main === module) {
         Import.properties = [];
         Import.rootFile = null;
         Import.importedDeclarations = {};
+        Import.delayedEnabled = false;
         throw ex;
       }
     };
@@ -4797,6 +4800,7 @@ if (typeof module !== 'undefined' && require.main === module) {
       args = [this.checkImports(o, variable, filename)];
       if (!(Import.imported[filename] || o.importingFile === filename)) {
         args.push(new Literal("function(cl) { " + variable + " = cl; }"));
+        Import.delayedEnabled = true;
       }
       word = Import.rootFile !== o.filename ? "this" : "__imports";
       call = new Call(new Literal("" + word + ".get"), args);
@@ -4846,6 +4850,7 @@ if (typeof module !== 'undefined' && require.main === module) {
         Import.properties = [];
         Import.rootFile = null;
         Import.importedDeclarations = {};
+        Import.delayedEnabled = false;
       }
     };
 
@@ -4853,12 +4858,18 @@ if (typeof module !== 'undefined' && require.main === module) {
       var call, code, properties, property, thisLit, value, values, _i, _len, _ref3;
       o = extend({}, o);
       o.indent += TAB;
-      properties = {
-        list: new Literal("{}"),
-        delayed: new Literal("[]"),
-        put: new Literal("function(path, code) { " + "this.list[path] = code; " + "}"),
-        get: new Literal("function(path, delayed) { " + "if (delayed) " + "this.delayed.push([path, delayed]); " + "return this.list[path]; " + "}")
-      };
+      properties = {};
+      properties.list = new Literal("{}");
+      if (Import.delayedEnabled) properties.delayed = new Literal("[]");
+      properties.put = new Literal("function(path, code) { " + "this.list[path] = code; " + "}");
+      properties.get = (function() {
+        switch (Import.delayedEnabled) {
+          case true:
+            return new Literal("function(path, delayed) { " + "if (delayed) " + "this.delayed.push([path, delayed]); " + "return this.list[path]; " + "}");
+          default:
+            return new Literal("function(path) { " + "return this.list[path]; " + "}");
+        }
+      })();
       thisLit = new Literal("this");
       code = new Code([]);
       for (property in properties) {
@@ -4870,7 +4881,9 @@ if (typeof module !== 'undefined' && require.main === module) {
         values = _ref3[_i];
         code.body.push(new Call(new Value(thisLit, [new Access(new Literal("put"))]), values));
       }
-      code.body.push(new Literal("(function(a, b, c) { " + "while (c = a.shift()) { " + "c[1](b[c[0]]); " + "} " + "})(this.delayed, this.list)"));
+      if (Import.delayedEnabled) {
+        code.body.push(new Literal("(function(a, b, c) { " + "while (c = a.shift()) { " + "c[1](b[c[0]]); " + "} " + "})(this.delayed, this.list)"));
+      }
       code.body.push(new Literal("this"));
       code.body.makeReturn();
       code = new Value(code, [new Access(new Literal("call"))]);
