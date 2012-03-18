@@ -2182,8 +2182,8 @@ exports.Import = class Import extends Base
     properties.list    = new Literal "{}"
     properties.delayed = new Literal "[]" if Import.delayedEnabled
     properties.put = new Literal "function(path, code) { " +
-        "this.list[path] = code; " +
-      "}"
+      "this.list[path] = code; " +
+    "}"
     properties.get = switch Import.delayedEnabled
       when yes then new Literal "function(path, delayed) { " +
         "if (delayed) " +
