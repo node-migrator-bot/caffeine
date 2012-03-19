@@ -2057,6 +2057,7 @@ exports.Import = class Import extends Base
   @properties: []
   @rootFile: null
   @importedDeclarations: {}
+  @delayedEnabled: no
 
   constructor: (@searchPath, types={}) ->
     {@isAbsolute, @isRelative, @isResolve} = types
@@ -2093,10 +2094,14 @@ exports.Import = class Import extends Base
     Import.rootFile or= o.filename
 
     try super o, lvl catch ex
-      Import.imported = {}
+      Import.imported   = {}
       Import.properties = []
-      Import.rootFile = null
+
+      Import.rootFile       = null
+      Import.delayedEnabled = no
+
       Import.importedDeclarations = {}
+
       throw ex
 
   compileNode: (o) ->
@@ -2108,10 +2113,11 @@ exports.Import = class Import extends Base
 
     filename = @filename o
     
-    args = [ @checkImports o, variable, filename ]
+    args = [ new Literal "'#{ @checkImports o, variable, filename }'"]
 
     unless Import.imported[filename] or o.importingFile is filename
       args.push new Literal "function(cl) { #{variable} = cl; }"
+      Import.delayedEnabled = yes
 
     word = if Import.rootFile isnt o.filename then "this" else "__imports"
 
@@ -2125,10 +2131,7 @@ exports.Import = class Import extends Base
     rel = if Import.rootFile is "repl" then "." else Import.rootFile
     relative = (Path.relative FileSystem.realpathSync(rel), file).replace /^(\.\.\/|\.\.\\\\)/, ""
 
-    if relative is ""
-      literalKey = new Literal "\"#{ Path.basename file }\""
-    else
-      literalKey = new Literal "\"#{ relative }\""
+    importKey = relative or Path.basename file 
 
     unless file of Import.imported
       Import.imported[file] = no
@@ -2151,57 +2154,60 @@ exports.Import = class Import extends Base
 
       o.importingFile = file
 
-      Import.properties.push [ literalKey, new Literal call.compile o ]
+      Import.properties.push [ importKey, call.compile o ]
 
       Import.imported[file] = yes
 
-      if relative is ""
-        Import.importedDeclarations[variable] = new Call new Literal("__imports.get"), [literalKey]
+      unless relative
+        Import.importedDeclarations[variable] = new Call new Literal("__imports.get"), [new Literal "'#{ importKey }'"]
 
-    literalKey
+    importKey
 
   @flush: (o)  ->
     try
       return unless Import.properties.length
       return ["__imports", Import.assignImports o]
     finally
-      Import.imported = {}
+      Import.imported   = {}
       Import.properties = []
-      Import.rootFile = null
+
+      Import.rootFile       = null
+      Import.delayedEnabled = no
+
       Import.importedDeclarations = {}
 
   @assignImports: (o)  ->
     o = extend {}, o
     o.indent += TAB
 
-    properties = 
-      list    : new Literal "{}"
-      delayed : new Literal "[]"
-
-      put : new Literal "function(path, code) { " +
-        "this.list[path] = code; " +
-      "}"
-      get : new Literal "function(path, delayed) { " +
-        "if (delayed) " +
-          "this.delayed.push([path, delayed]); " +
-        "return this.list[path]; " +
-      "}"
-
-    thisLit = new Literal "this"
-
     code = new Code []
+    code.body.push new Assign new Value(new Literal "delayed"), new Literal "[]" if Import.delayedEnabled
+    code.body.push new Assign new Value(new Literal "list"),    new Literal "{}"
+    code.body.push new Assign(
+      new Value(new Literal("this"), [ new Access new Literal "get" ])
+      new Literal switch Import.delayedEnabled
+        when yes then "function(key, func) { " +
+          "if (func) { " +
+            "delayed.push([func, key]); } " +
+          "return list[key]; " +
+        "}"
+        else "function(key) { " +
+          "return list[key]; " +
+        "}"
+    )
 
-    for property, value of properties
-      code.body.push new Assign new Value(thisLit, [ new Access new Literal property ]), value
+    for [importKey, codeBlock] in Import.properties
+      code.body.push new Assign(
+        new Value(new Literal("list"), [ new Access new Literal "'#{ importKey }'" ]),
+        new Literal codeBlock
+      )
 
-    for values in Import.properties
-      code.body.push new Call   new Value(thisLit, [ new Access new Literal "put" ]), values
-
-    code.body.push new Literal "(function(a, b, c) { " +
-      "while (c = a.shift()) { " +
-        "c[1](b[c[0]]); " +
-      "} " +
-    "})(this.delayed, this.list)"
+    if Import.delayedEnabled
+      code.body.push new Literal "(function(a) { " +
+        "while (a = delayed.shift()) { " +
+          "a[0](list[a[1]]); " +
+        "} " +
+      "})()"
 
     code.body.push new Literal "this"
     code.body.makeReturn()

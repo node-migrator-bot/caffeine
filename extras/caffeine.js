@@ -1,5 +1,5 @@
 /**
- * CoffeeScript Compiler v0.1.7
+ * CoffeeScript Compiler v0.1.8
  * http://coffeescript.org
  *
  * Copyright 2011, Jeremy Ashkenas
@@ -4729,6 +4729,8 @@ if (typeof module !== 'undefined' && require.main === module) {
 
     Import.importedDeclarations = {};
 
+    Import.delayedEnabled = false;
+
     function Import(searchPath, types) {
       this.searchPath = searchPath;
       if (types == null) types = {};
@@ -4781,6 +4783,7 @@ if (typeof module !== 'undefined' && require.main === module) {
         Import.imported = {};
         Import.properties = [];
         Import.rootFile = null;
+        Import.delayedEnabled = false;
         Import.importedDeclarations = {};
         throw ex;
       }
@@ -4794,9 +4797,10 @@ if (typeof module !== 'undefined' && require.main === module) {
         return "";
       }
       filename = this.filename(o);
-      args = [this.checkImports(o, variable, filename)];
+      args = [new Literal("'" + (this.checkImports(o, variable, filename)) + "'")];
       if (!(Import.imported[filename] || o.importingFile === filename)) {
         args.push(new Literal("function(cl) { " + variable + " = cl; }"));
+        Import.delayedEnabled = true;
       }
       word = Import.rootFile !== o.filename ? "this" : "__imports";
       call = new Call(new Literal("" + word + ".get"), args);
@@ -4805,14 +4809,10 @@ if (typeof module !== 'undefined' && require.main === module) {
     };
 
     Import.prototype.checkImports = function(o, variable, file) {
-      var call, code, lexer, literalKey, rel, relative;
+      var call, code, importKey, lexer, rel, relative;
       rel = Import.rootFile === "repl" ? "." : Import.rootFile;
       relative = (Path.relative(FileSystem.realpathSync(rel), file)).replace(/^(\.\.\/|\.\.\\\\)/, "");
-      if (relative === "") {
-        literalKey = new Literal("\"" + (Path.basename(file)) + "\"");
-      } else {
-        literalKey = new Literal("\"" + relative + "\"");
-      }
+      importKey = relative || Path.basename(file);
       if (!(file in Import.imported)) {
         Import.imported[file] = false;
         o = extend({}, o);
@@ -4828,13 +4828,13 @@ if (typeof module !== 'undefined' && require.main === module) {
         code = new Value(code, [new Access(new Literal("call"))]);
         call = new Call(code, [new Literal("this")]);
         o.importingFile = file;
-        Import.properties.push([literalKey, new Literal(call.compile(o))]);
+        Import.properties.push([importKey, call.compile(o)]);
         Import.imported[file] = true;
-        if (relative === "") {
-          Import.importedDeclarations[variable] = new Call(new Literal("__imports.get"), [literalKey]);
+        if (!relative) {
+          Import.importedDeclarations[variable] = new Call(new Literal("__imports.get"), [new Literal("'" + importKey + "'")]);
         }
       }
-      return literalKey;
+      return importKey;
     };
 
     Import.flush = function(o) {
@@ -4845,32 +4845,36 @@ if (typeof module !== 'undefined' && require.main === module) {
         Import.imported = {};
         Import.properties = [];
         Import.rootFile = null;
+        Import.delayedEnabled = false;
         Import.importedDeclarations = {};
       }
     };
 
     Import.assignImports = function(o) {
-      var call, code, properties, property, thisLit, value, values, _i, _len, _ref3;
+      var call, code, codeBlock, importKey, _i, _len, _ref3, _ref4;
       o = extend({}, o);
       o.indent += TAB;
-      properties = {
-        list: new Literal("{}"),
-        delayed: new Literal("[]"),
-        put: new Literal("function(path, code) { " + "this.list[path] = code; " + "}"),
-        get: new Literal("function(path, delayed) { " + "if (delayed) " + "this.delayed.push([path, delayed]); " + "return this.list[path]; " + "}")
-      };
-      thisLit = new Literal("this");
       code = new Code([]);
-      for (property in properties) {
-        value = properties[property];
-        code.body.push(new Assign(new Value(thisLit, [new Access(new Literal(property))]), value));
+      if (Import.delayedEnabled) {
+        code.body.push(new Assign(new Value(new Literal("delayed")), new Literal("[]")));
       }
+      code.body.push(new Assign(new Value(new Literal("list")), new Literal("{}")));
+      code.body.push(new Assign(new Value(new Literal("this"), [new Access(new Literal("get"))]), new Literal((function() {
+        switch (Import.delayedEnabled) {
+          case true:
+            return "function(key, func) { " + "if (func) { " + "delayed.push([func, key]); } " + "return list[key]; " + "}";
+          default:
+            return "function(key) { " + "return list[key]; " + "}";
+        }
+      })())));
       _ref3 = Import.properties;
       for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-        values = _ref3[_i];
-        code.body.push(new Call(new Value(thisLit, [new Access(new Literal("put"))]), values));
+        _ref4 = _ref3[_i], importKey = _ref4[0], codeBlock = _ref4[1];
+        code.body.push(new Assign(new Value(new Literal("list"), [new Access(new Literal("'" + importKey + "'"))]), new Literal(codeBlock)));
       }
-      code.body.push(new Literal("(function(a, b, c) { " + "while (c = a.shift()) { " + "c[1](b[c[0]]); " + "} " + "})(this.delayed, this.list)"));
+      if (Import.delayedEnabled) {
+        code.body.push(new Literal("(function(a) { " + "while (a = delayed.shift()) { " + "a[0](list[a[1]]); " + "} " + "})()"));
+      }
       code.body.push(new Literal("this"));
       code.body.makeReturn();
       code = new Value(code, [new Access(new Literal("call"))]);
@@ -5011,7 +5015,7 @@ if (typeof module !== 'undefined' && require.main === module) {
     });
   }
 
-  exports.VERSION = '0.1.7';
+  exports.VERSION = '0.1.8';
 
   exports.RESERVED = RESERVED;
 
