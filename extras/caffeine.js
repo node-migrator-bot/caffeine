@@ -1,5 +1,5 @@
 /**
- * CoffeeScript Compiler v0.1.7
+ * CoffeeScript Compiler v0.1.8
  * http://coffeescript.org
  *
  * Copyright 2011, Jeremy Ashkenas
@@ -5015,7 +5015,7 @@ if (typeof module !== 'undefined' && require.main === module) {
     });
   }
 
-  exports.VERSION = '0.1.7';
+  exports.VERSION = '0.1.8';
 
   exports.RESERVED = RESERVED;
 
