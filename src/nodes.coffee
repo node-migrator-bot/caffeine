@@ -605,9 +605,9 @@ exports.Call = class Call extends Base
       return """
         (function(func, args, ctor) {
         #{idt}ctor.prototype = func.prototype;
-        #{idt}var child = new ctor, result = func.apply(child, args);
-        #{idt}return typeof result === "object" ? result : child;
-        #{@tab}})(#{ @variable.compile o, LEVEL_LIST }, #{splatArgs}, function() {})
+        #{idt}var child = new ctor, result = func.apply(child, args), t = typeof result;
+        #{idt}return t == "object" || t == "function" ? result || child : child;
+        #{@tab}})(#{ @variable.compile o, LEVEL_LIST }, #{splatArgs}, function(){})
       """
     base = new Value @variable
     if (name = base.properties.pop()) and base.isComplex()
@@ -1142,9 +1142,12 @@ exports.Assign = class Assign extends Base
   # operands are only evaluated once, even though we have to reference them
   # more than once.
   compileConditional: (o) ->
-    [left, rite] = @variable.cacheReference o
+    [left, right] = @variable.cacheReference o
+    # Disallow conditional assignment of undefined variables.
+    if left.base instanceof Literal and left.base.value != "this" and not o.scope.check left.base.value
+      throw new Error "the variable \"#{left.base.value}\" can't be assigned with #{@context} because it has not been defined."
     if "?" in @context then o.isExistentialEquals = true
-    new Op(@context[...-1], left, new Assign(rite, @value, '=') ).compile o
+    new Op(@context[...-1], left, new Assign(right, @value, '=') ).compile o
 
   # Compile the assignment from an array splice literal, using JavaScript's
   # `Array#splice` method.
@@ -1193,6 +1196,7 @@ exports.Code = class Code extends Base
     o.scope.shared  = del(o, 'sharedScope')
     o.indent        += TAB
     delete o.bare
+    delete o.isExistentialEquals
     params = []
     exprs  = []
     for name in @paramNames() # this step must be performed before the others
@@ -2286,7 +2290,6 @@ UTILITIES =
   # Shortcuts to speed up the lookup time for native functions.
   hasProp: -> '{}.hasOwnProperty'
   slice  : -> '[].slice'
-
 
 # Levels indicate a node's position in the AST. Useful for knowing if
 # parens are necessary or superfluous.
