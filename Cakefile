@@ -120,7 +120,7 @@ task 'build:browser', 'rebuild the merged script for inclusion in the browser', 
   """
   unless process.env.MINIFY is 'false'
     {parser, uglify} = require 'uglify-js'
-#    code = uglify.gen_code uglify.ast_squeeze uglify.ast_mangle parser.parse code
+    code = uglify.gen_code uglify.ast_squeeze uglify.ast_mangle parser.parse code
   fs.writeFileSync 'extras/caffeine.js', header + '\n' + code
   console.log "built ... running browser tests:"
   invoke 'test:browser'

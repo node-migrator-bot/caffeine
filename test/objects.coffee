@@ -269,4 +269,3 @@ test "#1961, #1974, regression with compound assigning to an implicit object", -
     four: 4
 
   eq obj.four, 4
-
