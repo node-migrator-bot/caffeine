@@ -76,7 +76,7 @@
         <a href="documentation/docs/nodes.html">The Syntax Tree &mdash; src/nodes</a>
         <a href="documentation/docs/scope.html">Lexical Scope &mdash; src/scope</a>
         <a href="documentation/docs/helpers.html">Helpers &amp; Utility Functions &mdash; src/helpers</a>
-        <a href="documentation/docs/coffee-script.html">The CoffeeScript Module &mdash; src/coffee-script</a>
+        <a href="documentation/docs/caffeine.html">The Caffeine Module &mdash; src/caffeine</a>
         <a href="documentation/docs/cake.html">Cake &amp; Cakefiles &mdash; src/cake</a>
         <a href="documentation/docs/command.html">"coffee" Command-Line Utility &mdash; src/command</a>
         <a href="documentation/docs/optparse.html">Option Parsing &mdash; src/optparse</a>
@@ -2822,7 +2822,7 @@ task(<span class="String"><span class="String">'</span>build:parser<span class="
       source = $('#repl_source').val()
       window.compiledJS = ''
       try
-        window.compiledJS = CoffeeScript.compile source, bare: on
+        window.compiledJS = Caffeine.compile source, bare: on
         el = $('#repl_results')[0]
         if el.innerText
           el.innerText = window.compiledJS
