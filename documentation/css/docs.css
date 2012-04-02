@@ -148,7 +148,7 @@ div.code {
   #logo {
     display: block;
     width: 185px; height: 50px;
-    background: url('../images/logo.png');
+    background: url('../images/logo.png?r=3');
     position: absolute;
     top: 0px; left: 10px;
   }
