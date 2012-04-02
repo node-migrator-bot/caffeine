@@ -1,4 +1,4 @@
-# [![CoffeeScript](https://github.com/ich/caffeine/raw/master/documentation/images/logo.png?r=2)](http://coffeescript.org)
+# [![CoffeeScript](https://github.com/ich/caffeine/raw/master/documentation/images/logo.png?r=3)](https://github.com/ich/caffeine)
 
   [![Build Status](https://secure.travis-ci.org/ich/caffeine.png)](http://travis-ci.org/ich/caffeine)
 
@@ -40,4 +40,4 @@
 
 ### Based on
 
-  [![CoffeeScript](https://github.com/jashkenas/coffee-script/raw/master/documentation/images/logo.png?r=2)](http://coffeescript.org)
+  [![CoffeeScript](https://github.com/jashkenas/coffee-script/raw/master/documentation/images/logo.png?r=3)](http://coffeescript.org)
