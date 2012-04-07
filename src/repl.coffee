@@ -94,7 +94,7 @@ run = (buffer) ->
   backlog = ''
   try
     _ = global._
-    returnValue = Caffeine.eval "_=(#{code}\n)", {
+    returnValue = Caffeine.eval "_=(undefined\n;#{code}\n)", {
       filename: 'repl'
       modulename: 'repl'
     }
