@@ -175,9 +175,7 @@ such as <code>--lint</code> or <code>--print</code>.</p>             </td>      
     <span class="nv">watchList = </span><span class="p">[]</span>
 
     <span class="nx">deepWatch</span> <span class="nx">source</span><span class="p">,</span> <span class="nx">watchList</span><span class="p">,</span> <span class="o">-&gt;</span>
-      <span class="k">for</span> <span class="nx">filename</span> <span class="k">in</span> <span class="nx">watchList</span>
-        <span class="k">continue</span> <span class="k">if</span> <span class="nx">filename</span> <span class="k">of</span> <span class="nx">watchers</span>
-
+      <span class="k">for</span> <span class="nx">filename</span> <span class="k">in</span> <span class="nx">watchList</span> <span class="k">when</span> <span class="nx">filename</span> <span class="o">not</span> <span class="k">of</span> <span class="nx">watchers</span>
         <span class="nx">do</span> <span class="nf">(filename) -&gt;</span>
           <span class="nx">watchers</span><span class="p">[</span><span class="nx">filename</span><span class="p">]</span> <span class="o">=</span> <span class="k">try</span>
               <span class="nx">fs</span><span class="p">.</span><span class="nx">watchFile</span> <span class="nx">filename</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="nx">compile</span> <span class="nx">filename</span>

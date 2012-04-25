@@ -1688,7 +1688,7 @@ to prevent watchers mistakes</p>             </td>             <td class="code">
     <span class="nv">rel = </span><span class="k">if</span> <span class="nx">Import</span><span class="p">.</span><span class="nx">rootFile</span> <span class="o">is</span> <span class="s2">&quot;repl&quot;</span> <span class="k">then</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="nx">Import</span><span class="p">.</span><span class="nx">rootFile</span>
     <span class="nv">relative = </span><span class="p">(</span><span class="nx">Path</span><span class="p">.</span><span class="nx">relative</span> <span class="nx">FileSystem</span><span class="p">.</span><span class="nx">realpathSync</span><span class="p">(</span><span class="nx">rel</span><span class="p">),</span> <span class="nx">file</span><span class="p">).</span><span class="nx">replace</span> <span class="sr">/^(\.\.\/|\.\.\\\\)/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span>
 
-    <span class="nv">importKey = </span><span class="nx">relative</span> <span class="o">or</span> <span class="nx">Path</span><span class="p">.</span><span class="nx">basename</span> <span class="nx">file</span>
+    <span class="nv">importKey = </span><span class="p">(</span><span class="nx">relative</span> <span class="o">or</span> <span class="nx">Path</span><span class="p">.</span><span class="nx">basename</span> <span class="nx">file</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\.coffee$/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 
     <span class="nx">unless</span> <span class="nx">file</span> <span class="k">of</span> <span class="nx">Import</span><span class="p">.</span><span class="nx">imported</span>
       <span class="nx">Import</span><span class="p">.</span><span class="nx">imported</span><span class="p">[</span><span class="nx">file</span><span class="p">]</span> <span class="o">=</span> <span class="kc">no</span>
@@ -1703,7 +1703,14 @@ to prevent watchers mistakes</p>             </td>             <td class="code">
       <span class="nv">lexer = </span><span class="k">new</span> <span class="nx">Lexer</span><span class="p">()</span>
 
       <span class="nv">code = </span><span class="k">new</span> <span class="nx">Code</span> <span class="p">[]</span>
-      <span class="nx">code</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">push</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">parse</span> <span class="nx">lexer</span><span class="p">.</span><span class="nx">tokenize</span> <span class="nx">FileSystem</span><span class="p">.</span><span class="nx">readFileSync</span> <span class="nx">file</span><span class="p">,</span> <span class="s1">&#39;utf8&#39;</span>
+
+      <span class="k">try</span>
+        <span class="nx">code</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">push</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">parse</span> <span class="nx">lexer</span><span class="p">.</span><span class="nx">tokenize</span> <span class="nx">FileSystem</span><span class="p">.</span><span class="nx">readFileSync</span> <span class="nx">file</span><span class="p">,</span> <span class="s1">&#39;utf8&#39;</span>
+      <span class="k">catch</span> <span class="nx">ex</span>
+        <span class="k">if</span> <span class="nx">relative</span>
+          <span class="nv">ex.filename = </span><span class="nx">relative</span>
+        <span class="k">throw</span> <span class="nx">ex</span>
+
       <span class="nx">code</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">push</span> <span class="k">new</span> <span class="nx">Literal</span> <span class="nx">variable</span>
       <span class="nx">code</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">makeReturn</span><span class="p">()</span>
       <span class="nv">code = </span><span class="k">new</span> <span class="nx">Value</span> <span class="nx">code</span><span class="p">,</span> <span class="p">[</span><span class="k">new</span> <span class="nx">Access</span> <span class="k">new</span> <span class="nx">Literal</span> <span class="s2">&quot;call&quot;</span><span class="p">]</span>

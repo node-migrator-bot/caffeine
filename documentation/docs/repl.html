@@ -55,7 +55,7 @@ of exiting.</p>             </td>             <td class="code">               <d
   <span class="nv">backlog = </span><span class="s1">&#39;&#39;</span>
   <span class="k">try</span>
     <span class="nv">_ = </span><span class="nx">global</span><span class="p">.</span><span class="nx">_</span>
-    <span class="nv">returnValue = </span><span class="nx">Caffeine</span><span class="p">.</span><span class="nb">eval</span> <span class="s2">&quot;_=(#{code}\n)&quot;</span><span class="p">,</span> <span class="p">{</span>
+    <span class="nv">returnValue = </span><span class="nx">Caffeine</span><span class="p">.</span><span class="nb">eval</span> <span class="s2">&quot;_=(undefined\n;#{code}\n)&quot;</span><span class="p">,</span> <span class="p">{</span>
       <span class="nv">filename: </span><span class="s1">&#39;repl&#39;</span>
       <span class="nv">modulename: </span><span class="s1">&#39;repl&#39;</span>
     <span class="p">}</span>
